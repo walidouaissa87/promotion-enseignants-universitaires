@@ -14,7 +14,7 @@ from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 from xml.sax.saxutils import escape
 
-from engine import CUN_GRADES, HU_GRADES, PUBLICATIONS, evaluate, parse_date
+from engine import CUN_GRADES, HU_GRADES, PUBLICATIONS, evaluate, parse_date, parse_years
 from rules import RULES, SOURCES
 
 try:  # netteté sur écrans haute résolution
@@ -29,13 +29,15 @@ EMAIL = "meflah_aissa@yahoo.fr"
 DATA_DIR = Path(os.environ.get("APPDATA") or Path.home()) / "Promotion_Enseignants_Universitaires"
 DOSSIERS = DATA_DIR / "dossiers"
 STATE = DATA_DIR / "dernier_dossier.txt"
+BACKUPS = DATA_DIR / "sauvegardes"
+TRANSIENT = ("identifier", "journal", "issue")  # champs de saisie non enregistrés dans le profil
 
 # Palette
 NAVY, BLUE, TEAL, GREEN = "#12355b", "#1d6fb8", "#0f8f84", "#2e9e5b"
 ORANGE, RED, PURPLE, GOLD = "#ef8a17", "#d64550", "#7c4dbd", "#c9951a"
 SLATE, BG, CARD, TEXT, MUTED = "#5b6b7c", "#eaf0f7", "#ffffff", "#152638", "#64748b"
 TRACKS = {"HU": "Habilitation universitaire  →  MCA", "CUN54": "CUN 54  →  Professeur"}
-DOMAINS = {"ST": "ST — Sciences et technologie", "SHS": "SHS — Sciences humaines et sociales"}
+DOMAINS = {"ST": "ST — Sciences et technologie", "SHS": "SHS — Sc. humaines et sociales"}
 POSITIONS = {"Auteur unique": 1, "1er auteur": 1, "2e auteur": 2, "3e auteur": 3, "4e auteur et au-delà": 4}
 THEMES = {
     "CUN54": dict(bg="#c08d0c", fg="#2b1d00", g1=NAVY, g2="#8a5a00", title="PROFESSEUR", tcolor="#fff0a8",
@@ -179,6 +181,9 @@ def pdf_bytes(profile, items, result):
         phd = parse_date(profile.get("phd_date"))
         rows.append([P("Date du doctorat", cell), P(phd.strftime("%d/%m/%Y") if phd else "—", cell), P("Même filière", cell),
                      P("Oui" if profile.get("same_field") else "Non", cell)])
+    grade_d, closing_d = parse_date(profile.get("grade_date")), parse_date(profile.get("closing_date"))
+    rows.append([P("Promotion au grade", cell), P(grade_d.strftime("%d/%m/%Y") if grade_d else "—", cell), P("Clôture candidatures", cell),
+                 P(closing_d.strftime("%d/%m/%Y") if closing_d else "—", cell)])
     cand = Table(rows, colWidths=[30 * mm, 57 * mm, 30 * mm, 57 * mm])
     cand.setStyle(TableStyle([("GRID", (0, 0), (-1, -1), .4, colors.HexColor("#c7d3e0")),
                               ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#e3edf8")),
@@ -190,7 +195,7 @@ def pdf_bytes(profile, items, result):
     # 2. Résultat
     ok = result["ok"]
     verdict_color = colors.HexColor(GREEN if ok else RED)
-    verdict = Table([[PX(f"<font color='white'><b>{'RECEVABLE' if ok else 'INCOMPLET'}</b></font>",
+    verdict = Table([[PX(f"<font color='white'><b>{'SATISFAITS' if ok else 'INCOMPLET'}</b></font>",
                          ParagraphStyle("v", parent=base, fontSize=12, leading=15, alignment=1)),
                       PX(f"<font color='white'>{escape(result['decision'])}</font>", ParagraphStyle("v2", parent=base, fontSize=8.8, leading=11.5))]],
                     colWidths=[34 * mm, 140 * mm])
@@ -286,7 +291,7 @@ def pdf_bytes(profile, items, result):
                                     ("BOX", (0, 0), (-1, -1), .8, colors.HexColor(ORANGE))]))
         story += [KeepTogether([section(5, "Points à vérifier"), Spacer(1, 4), issues]), Spacer(1, 8)]
 
-    note = Table([[P("Simulation indicative établie à partir des textes officiels du MESRS. Les justificatifs, le classement des revues "
+    note = Table([[P("Simulation indicative, sans valeur de décision administrative, établie à partir des textes officiels du MESRS. Les justificatifs, le classement des revues "
                      "(DGRSDT) et la décision finale relèvent exclusivement des instances compétentes.", small)]], colWidths=[full])
     note.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#eef3f9")),
                               ("LINEBEFORE", (0, 0), (0, -1), 3, accent), ("LEFTPADDING", (0, 0), (-1, -1), 8)]))
@@ -420,7 +425,7 @@ class App(tk.Tk):
         self.configure(bg=BG)
         self.dossier_id = uuid.uuid4().hex
         self.items = []
-        self.vars = {key: tk.StringVar() for key in ("name", "institution", "phd_date", "effective_years", "identifier")}
+        self.vars = {key: tk.StringVar() for key in ("name", "institution", "phd_date", "effective_years", "grade_date", "closing_date", "identifier", "journal", "issue")}
         self.track, self.domain, self.grade = tk.StringVar(value="HU"), tk.StringVar(value="ST"), tk.StringVar(value="MCB")
         self.track_text, self.domain_text = tk.StringVar(value=TRACKS["HU"]), tk.StringVar(value=DOMAINS["ST"])
         self.same_field = tk.BooleanVar(value=True)
@@ -437,6 +442,7 @@ class App(tk.Tk):
         self._build()
         self.restore_last()
         self.apply_theme()
+        self.backup_current()
         self.list_dossiers()
         self.refresh()
         self.protocol("WM_DELETE_WINDOW", self.close)
@@ -504,6 +510,7 @@ class App(tk.Tk):
         make_button(strip, "Ouvrir", TEAL, self.open_selected, size=9, padx=12, pady=3).pack(side="left")
         make_button(strip, "＋  Nouveau dossier", BLUE, self.new_dossier, size=9, padx=12, pady=3).pack(side="left", padx=S(8))
         make_button(strip, "Aperçu PDF", PURPLE, self.preview_pdf, size=9, padx=12, pady=3).pack(side="left")
+        make_button(strip, "✕ Supprimer le dossier", RED, self.delete_dossier, size=9, padx=12, pady=3).pack(side="left", padx=S(8))
         self.status = tk.Label(strip, text="", bg=BG, fg=MUTED, font=("Segoe UI", 9, "italic"))
         self.status.pack(side="right")
 
@@ -539,7 +546,7 @@ class App(tk.Tk):
         self.track_combo.grid(row=0, column=5, sticky="w", padx=(0, S(12)), pady=S(1))
         self.track_combo.bind("<<ComboboxSelected>>", self.switch_track)
         label("Domaine", 0, 6)
-        self.domain_combo = ttk.Combobox(inner, textvariable=self.domain_text, values=list(DOMAINS.values()), state="readonly", width=22)
+        self.domain_combo = ttk.Combobox(inner, textvariable=self.domain_text, values=list(DOMAINS.values()), state="readonly", width=26)
         self.domain_combo.grid(row=0, column=7, sticky="w", pady=S(1))
         self.domain_combo.bind("<<ComboboxSelected>>", self.change_domain)
         label("Grade actuel", 1, 0)
@@ -565,6 +572,21 @@ class App(tk.Tk):
         self.same_check = tk.Checkbutton(inner, text="Même filière que le doctorat", variable=self.same_field, command=self.refresh,
                                          bg=CARD, activebackground=CARD, disabledforeground="#a3afbd", font=("Segoe UI", 10), bd=0, highlightthickness=0)
         self.same_check.grid(row=1, column=6, columnspan=2, sticky="w")
+        self.date_hints = {}
+
+        def date_field(row, col, text, name):
+            ttk.Label(inner, text=text).grid(row=row, column=col, sticky="w", padx=(0, S(5)), pady=S(1))
+            box = tk.Frame(inner, bg=CARD)
+            box.grid(row=row, column=col + 1, sticky="w")
+            entry = ttk.Entry(box, textvariable=self.vars[name], width=12)
+            entry.pack(side="left")
+            make_button(box, "▦", BLUE, lambda: open_calendar(self, self.vars[name], entry), size=9, padx=6, pady=1).pack(side="left", padx=(S(4), 0))
+            hint = tk.Label(box, text="", bg=CARD, font=("Segoe UI", 9, "bold"))
+            hint.pack(side="left", padx=S(4))
+            self.date_hints[name] = hint
+
+        date_field(2, 0, "Promotion au grade actuel", "grade_date")
+        date_field(2, 2, "Clôture des candidatures", "closing_date")
 
     def _build_entry(self, parent):
         card, inner = make_card(parent, "②  Ajouter une activité", ORANGE)
@@ -599,6 +621,14 @@ class App(tk.Tk):
                                     font=("Segoe UI", 9), bd=0, highlightthickness=0)
             widget.pack(side="left", padx=(0, S(4)))
             self.pub_widgets.append(widget)
+        pubs2 = tk.Frame(inner, bg=CARD)
+        pubs2.pack(fill="x", pady=(S(3), 0))
+        for text, name, width in (("Revue / ISSN", "journal", 30), ("Vol. / N°", "issue", 12)):
+            lab = tk.Label(pubs2, text=text, bg=CARD, fg=TEXT, font=("Segoe UI", 10))
+            lab.pack(side="left", padx=(0, S(4)))
+            ent = ttk.Entry(pubs2, textvariable=self.vars[name], width=width)
+            ent.pack(side="left", padx=(0, S(10)))
+            self.pub_widgets += [lab, ent]
         self.points_frame = tk.Frame(inner, bg=CARD)
         ttk.Label(self.points_frame, text="Points attestés (0 à 10)").pack(side="left", padx=(0, S(5)))
         ttk.Entry(self.points_frame, textvariable=self.custom_points, width=6).pack(side="left")
@@ -658,7 +688,7 @@ class App(tk.Tk):
 
     # ---------------------------------------------------------------- données
     def profile(self):
-        data = {key: var.get().strip() for key, var in self.vars.items() if key != "identifier"}
+        data = {key: var.get().strip() for key, var in self.vars.items() if key not in TRANSIENT}
         data.update(track=self.track.get(), domain=self.domain.get(), current_grade=self.grade.get(), same_field=self.same_field.get())
         return data
 
@@ -700,7 +730,7 @@ class App(tk.Tk):
         self.dossier_id = str(data.get("id") or uuid.uuid4().hex)
         self.items = [item for item in data["items"] if isinstance(item, dict)]
         for key, var in self.vars.items():
-            if key != "identifier":
+            if key not in TRANSIENT:
                 var.set(str(profile.get(key) or ""))
         track = profile.get("track") if profile.get("track") in RULES else "HU"
         domain = profile.get("domain") if profile.get("domain") in DOMAINS else "ST"
@@ -742,6 +772,37 @@ class App(tk.Tk):
             self.set_status("Dossier ouvert.")
         except (OSError, ValueError, TypeError) as exc:
             messagebox.showerror(APP_NAME, f"Impossible d'ouvrir ce dossier : {exc}")
+
+    def backup_current(self):
+        """Copie datée du dossier courant dans « sauvegardes » (30 copies conservées)."""
+        try:
+            atomic_write(BACKUPS / f"{self.dossier_id[:8]}_{datetime.now():%Y%m%d_%H%M%S}.json",
+                         json.dumps(self.payload(), ensure_ascii=False, indent=2))
+            for old in sorted(BACKUPS.glob("*.json"), key=lambda p: p.stat().st_mtime)[:-30]:
+                old.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+    def delete_dossier(self):
+        if not messagebox.askyesno(APP_NAME, "Supprimer ce dossier de cet ordinateur ?\nUne copie de sécurité reste dans le dossier « sauvegardes »."):
+            return
+        if self._save_job is not None:
+            self.after_cancel(self._save_job)
+            self._save_job = None
+        self.backup_current()
+        (DOSSIERS / f"{self.dossier_id}.json").unlink(missing_ok=True)
+        others = sorted(DOSSIERS.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+        data = None
+        for path in others:
+            try:
+                data = json.loads(path.read_text(encoding="utf-8"))
+                break
+            except (OSError, ValueError):
+                continue
+        self.load(data if data else self.blank(self.track.get()))
+        self.save()
+        self.list_dossiers()
+        self.set_status("Dossier supprimé (copie dans « sauvegardes »).")
 
     def import_json(self):
         source = filedialog.askopenfilename(filetypes=[("Dossier JSON", "*.json")])
@@ -838,7 +899,7 @@ class App(tk.Tk):
             unit = "points à saisir selon attestation" if rule.key == "study_office" else f"{fmt(rule.points)} pt(s) par unité"
             extra = "  ⚠ supplément : exige l'activité de base correspondante" if "supplément" in rule.label.lower() else ""
             self.rule_hint.configure(text=f"{unit}{cap}{extra}" + (f"\n{rule.detail}" if rule.detail else "")
-                                     + ("\nChaque publication se saisit séparément (position d'auteur et classement confirmé obligatoires)." if is_pub else ""))
+                                     + ("\nChaque publication se saisit séparément (position, classement confirmé ; revue obligatoire pour le rang C de la CUN 54)." if is_pub else ""))
 
     def add_item(self):
         rule = self.selected_rule()
@@ -858,6 +919,7 @@ class App(tk.Tk):
                     return
             sole = self.author_text.get() == "Auteur unique"
             item.update(author_position=POSITIONS[self.author_text.get()], principal=True if sole else self.principal.get(), sole=sole,
+                        journal=self.vars["journal"].get().strip(), issue=self.vars["issue"].get().strip(),
                         after_phd=self.after_phd.get(), outside_thesis=self.outside_thesis.get(), confirmed=self.confirmed.get(),
                         alphabetical=self.alphabetical.get())
         if rule.key == "study_office":
@@ -869,7 +931,8 @@ class App(tk.Tk):
                 messagebox.showerror(APP_NAME, "Saisissez les points attestés (nombre entre 0 et 10).")
                 return
         self.items.append(item)
-        self.vars["identifier"].set("")
+        for name in TRANSIENT:
+            self.vars[name].set("")
         self.count.set("1")
         self.save()
         self.refresh()
@@ -898,7 +961,7 @@ class App(tk.Tk):
                 rule = rulemap.get(item.get("key"))
                 if not rule:
                     continue
-                note = item.get("identifier") or ""
+                note = " · ".join(x for x in (item.get("identifier"), item.get("journal")) if x)
                 if rule.key in PUBLICATIONS:
                     position = "Auteur unique" if item.get("sole") else next((k for k, v in POSITIONS.items() if v == item.get("author_position") and k != "Auteur unique"), "?")
                     note = f"{position}" + (f" · {note}" if note else "")
@@ -949,12 +1012,17 @@ class App(tk.Tk):
             self.phd_hint.configure(text="✔ date valide", fg=GREEN)
         else:
             self.phd_hint.configure(text="✘ format invalide", fg=RED)
-        years = self.vars["effective_years"].get().strip().replace(",", ".")
-        try:
-            ok = bool(years) and float(years) >= 0
-        except ValueError:
-            ok = False
-        self.years_hint.configure(text="" if not years else ("✔" if ok else "✘ nombre attendu"), fg=GREEN if ok else RED)
+        years = self.vars["effective_years"].get().strip()
+        ok = parse_years(years) is not None
+        self.years_hint.configure(text="" if not years else ("✔" if ok else "✘ 0 à 60"), fg=GREEN if ok else RED)
+        for name, hint in self.date_hints.items():
+            value = self.vars[name].get().strip()
+            if not value:
+                hint.configure(text="facultatif", fg=MUTED)
+            elif parse_date(value):
+                hint.configure(text="✔", fg=GREEN)
+            else:
+                hint.configure(text="✘ JJ/MM/AAAA", fg=RED)
 
     def draw_bars(self):
         canvas = self.bars
@@ -993,11 +1061,15 @@ class App(tk.Tk):
                 ("h2", "Comment procéder\n"),
                 ("", "1. Choisissez le parcours (habilitation ou CUN 54) et renseignez le profil.\n2. Ajoutez chaque activité (les publications une par une, avec position d'auteur et classement confirmé).\n3. Lisez le bilan à droite : conditions de recevabilité, points et rappels.\n4. « Aperçu PDF » affiche le rapport avant export ; « Rapport PDF » l'enregistre. Tout est sauvegardé automatiquement.\n"),
                 ("h2", "Habilitation universitaire — arrêté 804 du 14/07/2021, art. 7\n"),
-                ("", "• Être maître de conférences classe B.\n• Trois (3) ans d'activité effective au minimum.\n• Doctorat depuis au moins un (1) an.\n• Dossier déposé dans la filière du doctorat.\n• Auteur principal d'au moins une (1) publication hors thèse, soumise et publiée après la soutenance (rang A ou B en S&T ; A, B ou C en SHS).\n• Aucun seuil de points n'est publié : la commission régionale fixe le minimum après délibération.\n"),
+                ("", "• Être maître de conférences classe B.\n• Trois (3) ans d'activité effective au minimum.\n• Doctorat depuis au moins un (1) an.\n• Dossier déposé dans la filière du doctorat.\n• Auteur principal d'au moins une (1) publication hors thèse, soumise et publiée après la soutenance (rang A ou B en S&T ; A, B ou C en SHS).\n• Expérience d'enseignement (cours, polycopié ou encadrement de master) — décret 21-50, art. 3.\n• Aucun seuil de points n'est publié : la commission régionale fixe le minimum après délibération.\n"),
                 ("h2", "Professeur — conditions et grille CUN 54 (mai 2026)\n"),
-                ("", "• Cinq (5) ans d'exercice effectif comme maître de conférences A.\n• S&T : 1 publication A+ (principal ou 2e), ou 1 A + 2 B (principal ou 2e).\n• SHS : 1 A, ou 1 B + 1 C (principal ou 2e), ou 2 C (auteur principal).\n• Encadrement : 1 thèse de doctorat soutenue (ou co-encadrée), ou 2 magisters, ou 4 masters.\n• Pédagogie ≥ 80 pts ; recherche ≥ 230 pts (S&T) ou ≥ 120 pts (SHS).\n"),
+                ("", "• Cinq (5) ans d'exercice effectif comme maître de conférences A.\n• S&T : 1 publication A+ (principal ou 2e), ou 1 A + 2 B (principal ou 2e).\n• SHS : 1 A, ou 1 B + 1 C (principal ou 2e), ou 2 C (auteur principal, revues et numéros différents : la revue doit être renseignée).\n• Encadrement : 1 thèse de doctorat soutenue (ou co-encadrée), ou 2 magisters, ou 4 masters.\n• Pédagogie ≥ 80 pts ; recherche ≥ 230 pts (S&T) ou ≥ 120 pts (SHS).\n"),
                 ("h2", "Rangs des co-auteurs\n"),
                 ("", "1er auteur ou auteur unique : 100 % · 2e auteur : 50 % · 3e auteur et au-delà : 25 % (100 % pour tous si l'ordre alphabétique est de règle, à justifier). Habilitation : la publication obligatoire (auteur principal, après la thèse, hors thèse) est exceptée et créditée à 100 %.\n"),
+                ("h2", "Dates à renseigner (facultatif mais recommandé)\n"),
+                ("", "• Promotion au grade actuel + clôture des candidatures : le programme vérifie les 5 ans (CUN 54) à la date de clôture, et le doctorat depuis 1 an (habilitation) à cette même date. Sans date de clôture, la date du jour est utilisée.\n• Exercice effectif : nombre fini de 0 à 60 ans.\n"),
+                ("h2", "Confidentialité et sauvegardes\n"),
+                ("", "Vos dossiers sont enregistrés localement (dossier %APPDATA%\\Promotion_Enseignants_Universitaires), au format JSON non chiffré ; rien n'est envoyé sur Internet. « Supprimer le dossier » les efface de l'ordinateur ; une copie datée est gardée dans « sauvegardes » (30 copies). Protégez votre session Windows.\n"),
                 ("h2", "Précautions\n"),
                 ("", "Les revues prédatrices ou non reconnues par la DGRSDT ne sont pas acceptées. Le programme ne consulte aucune base externe : « Classement confirmé » engage l'utilisateur. Le bilan est indicatif ; la décision appartient aux instances compétentes.\n"),
                 ("h2", "Sources officielles (dossier « references »)\n"),

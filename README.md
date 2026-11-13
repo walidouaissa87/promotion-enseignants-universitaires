@@ -18,6 +18,16 @@ Application Windows gratuite et hors ligne pour estimer et préparer un dossier 
 - Aperçu puis rapport PDF coloré ; sauvegarde automatique ; import / export JSON ; agenda de dates.
 - Aucune donnée n'est envoyée sur Internet. · لا تُرسل أي بيانات عبر الإنترنت.
 
+## Vérifications intégrées · ما يتحقق منه البرنامج
+- Publication obligatoire (habilitation) à 100 % ; rang C (CUN 54) : revues différentes exigées ; doublons de publications exclus.
+- Ancienneté MCA à la date de clôture des candidatures ; exercice effectif borné (0–60 ans).
+- Expérience d'enseignement exigée pour l'habilitation (décret 21-50, art. 3).
+- Aucun seuil de points n'est inventé pour l'habilitation ; les verdicts parlent de « critères satisfaits — vérification officielle nécessaire ».
+
+## Confidentialité · الخصوصية
+Les dossiers sont enregistrés localement (`%APPDATA%\Promotion_Enseignants_Universitaires`) en JSON non chiffré ; rien n'est envoyé sur Internet. Bouton « Supprimer le dossier » + copies de sécurité (30).
+تُحفظ الملفات محليًا بصيغة JSON غير مشفّرة ولا يُرسل شيء عبر الإنترنت.
+
 ## Téléchargement · التحميل
 Dernière version : onglet **Releases** (fichier `.exe`, Windows).
 أحدث نسخة: صفحة **Releases** (ملف exe لنظام ويندوز).
