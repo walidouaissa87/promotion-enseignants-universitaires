@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Promotion des enseignants universitaires — Algérie | ترقية الأساتذة الجامعيين</title>
+<meta name="description" content="Outil gratuit d'aide à l'estimation du dossier de promotion (habilitation universitaire, Professeur CUN 54). أداة مجانية مساعدة لتقدير ملف الترقية — نتائج استرشادية.">
+<style>
+:root{
+  --navy:#12355b; --blue:#1d6fb8; --teal:#0f8f84; --green:#2e9e5b; --orange:#ef8a17; --red:#d64550; --purple:#7c4dbd;
+  --gold:#c08d0c; --gold-light:#f6d98a; --ink:#152638; --muted:#5b6b7c; --bg:#fbf6e9; --card:#ffffff; --line:#e6dcc0;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#14100a; --card:#1e1810; --ink:#f3ead3; --muted:#b8a987; --line:#3a2f1a; --gold-light:#f2c95a}
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,"Noto Naskh Arabic",Tahoma,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+/* HERO */
+.hero{background:linear-gradient(120deg,var(--navy) 0%,#3b3a52 45%,#8a5a00 100%);color:#fff;padding:56px 0 72px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;inset:auto 0 0 0;height:6px;background:linear-gradient(90deg,var(--orange),var(--gold-light),var(--green))}
+.badge{display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);padding:4px 14px;border-radius:99px;font-size:.85rem;margin-bottom:16px}
+.hero h1{margin:0 0 6px;font-size:clamp(1.9rem,4.6vw,3.2rem);line-height:1.15;font-weight:800}
+.hero h1 .gold{color:var(--gold-light)}
+.hero .ar{direction:rtl;font-size:clamp(1.3rem,3vw,1.9rem);font-weight:700;color:var(--gold-light);margin:6px 0 18px}
+.hero p{max-width:760px;margin:6px 0;color:#e7edf5}
+.hero p.ar{color:#fff1c8;font-weight:400;font-size:1.05rem}
+.cta{display:flex;gap:14px;flex-wrap:wrap;margin-top:26px}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:12px;font-weight:700;text-decoration:none;color:#fff;box-shadow:0 8px 20px rgba(0,0,0,.25);transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn.dl{background:linear-gradient(135deg,var(--green),var(--teal));font-size:1.1rem}
+.btn.src{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.4);box-shadow:none}
+.btn small{display:block;font-weight:400;opacity:.9;font-size:.78rem}
+/* DISCLAIMER */
+.disclaimer{background:#fff4e0;border:2px solid var(--orange);border-radius:16px;margin:-34px 0 36px;padding:18px 22px;position:relative;z-index:2;color:#3a2a08;box-shadow:0 10px 26px rgba(0,0,0,.12)}
+@media (prefers-color-scheme:dark){.disclaimer{background:#2b2010;color:#f6e3b8}}
+.disclaimer .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.disclaimer b{color:var(--red)}
+.ar{direction:rtl;text-align:right}
+/* SECTIONS */
+section{padding:26px 0}
+h2{font-size:1.6rem;margin:0 0 4px}
+h2 .tag{display:inline-block;width:10px;height:26px;border-radius:4px;vertical-align:-4px;margin-right:10px;background:var(--c,var(--blue))}
+.sub{color:var(--muted);margin:0 0 20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-top:5px solid var(--c,var(--blue));border-radius:14px;padding:18px 18px 16px;box-shadow:0 4px 14px rgba(0,0,0,.06)}
+.card h3{margin:0 0 6px;font-size:1.08rem;color:var(--c,var(--blue))}
+.card p{margin:4px 0;font-size:.95rem}
+.card .ar{font-size:.95rem;color:var(--muted);border-top:1px dashed var(--line);margin-top:8px;padding-top:8px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+.panel h3{margin:0 0 8px}
+.panel ul{margin:6px 0 0;padding-left:20px}
+.panel.ar ul{padding:0 20px 0 0}
+.panel li{margin:4px 0}
+/* SCREENSHOTS */
+.shots{display:grid;grid-template-columns:1fr;gap:26px}
+.shot{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;box-shadow:0 10px 28px rgba(0,0,0,.14)}
+.shot img{width:100%;height:auto;border-radius:10px;display:block}
+.shot figcaption{padding:10px 6px 2px;color:var(--muted);font-size:.92rem;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.pdfshot{max-width:520px;margin:0 auto}
+/* STEPS */
+.steps{counter-reset:s;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}
+.step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;position:relative}
+.step:before{counter-increment:s;content:counter(s);position:absolute;top:-14px;left:16px;width:30px;height:30px;border-radius:50%;background:var(--c);color:#fff;font-weight:800;display:grid;place-items:center}
+.step b{display:block;margin:6px 0 2px}
+.step .ar{color:var(--muted);font-size:.92rem}
+/* SOURCES */
+.src a{color:var(--blue);word-break:break-all}
+footer{margin-top:36px;background:var(--navy);color:#dbe8f5;padding:26px 0;text-align:center}
+footer b{color:var(--gold-light)}
+@media (max-width:760px){
+  .disclaimer .cols,.two{grid-template-columns:1fr}
+  .hero{padding:38px 0 64px}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="badge">Windows · Gratuit / مجاني · Hors ligne / بدون إنترنت</span>
+    <h1>Promotion des enseignants <span class="gold">universitaires</span> — Algérie</h1>
+    <div class="ar">ترقية الأساتذة الجامعيين — الجزائر</div>
+    <p>Calculez et préparez votre dossier : <b>habilitation universitaire</b> (Maître de conférences A) et <b>promotion au grade de Professeur</b> (CUN 54), selon les textes officiels du MESRS.</p>
+    <p class="ar">احسب ملفك وحضّره: <b>التأهيل الجامعي</b> (أستاذ محاضر «أ») والترقية إلى رتبة <b>أستاذ</b> (اللجنة الجامعية الوطنية – الدورة 54) وفق نصوص وزارة التعليم العالي.</p>
+    <div class="cta">
+      <a class="btn dl" id="dl" href="#">⬇ Télécharger pour Windows<small>تحميل البرنامج لنظام ويندوز · .exe</small></a>
+      <a class="btn src" id="repo" href="#">⌥ Code source / الشيفرة المصدرية</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="disclaimer">
+    <div class="cols">
+      <div><b>⚠ Avertissement.</b> Cet outil est une <b>aide pour l'enseignant-chercheur</b> : les résultats sont <b>indicatifs uniquement</b> et <b>non officiels</b>. Les justificatifs, le classement des revues (DGRSDT) et la décision finale relèvent exclusivement des instances compétentes (commissions régionales, CUN).</div>
+      <div class="ar"><b>⚠ تنبيه.</b> هذه الأداة <b>مساعدة للأستاذ الباحث</b> فقط: النتائج <b>استرشادية وليست رسمية</b>. الوثائق الثبوتية وتصنيف المجلات (DGRSDT) والقرار النهائي من اختصاص الهيئات المعنية (اللجان الجهوية، اللجنة الجامعية الوطنية).</div>
+    </div>
+  </div>
+
+  <section style="--c:var(--blue)">
+    <h2><span class="tag"></span>Fonctionnalités · المميزات</h2>
+    <p class="sub">Tout est calculé sur votre ordinateur — vos données ne quittent jamais votre machine. · كل الحسابات على جهازك، وبياناتك لا تغادره.</p>
+    <div class="grid">
+      <div class="card" style="--c:var(--blue)"><h3>Deux parcours</h3><p>Habilitation (MCB → MCA) et Professeur (CUN 54), chacun avec son barème officiel.</p><p class="ar">مساران: التأهيل الجامعي والترقية إلى أستاذ، لكلٍّ منهما سلّمه الرسمي.</p></div>
+      <div class="card" style="--c:var(--green)"><h3>Calcul conforme</h3><p>Points, plafonds, rangs des co-auteurs (100 / 50 / 25 %), suppléments, exception de la publication obligatoire.</p><p class="ar">النقاط والسقوف ونسب المؤلفين المشاركين والزيادات واستثناء المنشور الإلزامي.</p></div>
+      <div class="card" style="--c:var(--orange)"><h3>Recevabilité</h3><p>Grade, ancienneté, doctorat, publications minimales S&amp;T / SHS, encadrement : ✔ / ✘ instantané.</p><p class="ar">شروط القبول: الرتبة والأقدمية والدكتوراه والمنشورات الدنيا وفق المجال والتأطير.</p></div>
+      <div class="card" style="--c:var(--purple)"><h3>Rapport PDF</h3><p>Aperçu avant export, puis un rapport coloré et structuré, prêt à joindre à votre réflexion.</p><p class="ar">معاينة قبل التصدير ثم تقرير PDF ملوّن ومنظم.</p></div>
+      <div class="card" style="--c:var(--teal)"><h3>Sauvegarde automatique</h3><p>Plusieurs dossiers conservés, import / export JSON, agenda pour les dates.</p><p class="ar">حفظ تلقائي لعدة ملفات، واستيراد وتصدير JSON، وأجندة لاختيار التواريخ.</p></div>
+      <div class="card" style="--c:var(--red)"><h3>Sources officielles</h3><p>Arrêté n° 804 du 14/07/2021, décret 21-50, conditions et grille CUN 54 — fournis dans le dépôt.</p><p class="ar">القرار 804 والمرسوم 21-50 وشروط وسلّم الدورة 54، مرفقة في المستودع.</p></div>
+    </div>
+  </section>
+
+  <section style="--c:var(--purple)">
+    <h2><span class="tag"></span>Aperçu · لقطات من البرنامج</h2>
+    <p class="sub">Le titre et la couleur de l'interface s'adaptent au grade visé. · يتغير العنوان ولون الواجهة حسب الرتبة المستهدفة.</p>
+    <div class="shots">
+      <figure class="shot" style="margin:0"><img src="img/ecran-professeur.jpg" alt="Parcours Professeur (CUN 54)" loading="lazy"><figcaption><span>Professeur — CUN 54</span><span class="ar">الترقية إلى رتبة أستاذ</span></figcaption></figure>
+      <figure class="shot" style="margin:0"><img src="img/ecran-habilitation.jpg" alt="Habilitation universitaire" loading="lazy"><figcaption><span>Habilitation universitaire — MCA</span><span class="ar">التأهيل الجامعي</span></figcaption></figure>
+      <figure class="shot pdfshot" style="margin:0 auto"><img src="img/rapport-pdf.png" alt="Rapport PDF" loading="lazy"><figcaption><span>Rapport PDF</span><span class="ar">تقرير PDF</span></figcaption></figure>
+    </div>
+    <p class="sub" style="margin-top:12px">Données d'exemple fictives. · بيانات تجريبية وهمية.</p>
+  </section>
+
+  <section style="--c:var(--orange)">
+    <h2><span class="tag"></span>Utilisation · طريقة الاستعمال</h2>
+    <p class="sub">&nbsp;</p>
+    <div class="steps">
+      <div class="step" style="--c:var(--blue)"><b>Télécharger</b><span>Récupérez le fichier .exe depuis « Releases ».</span><div class="ar">حمّل ملف exe من صفحة Releases.</div></div>
+      <div class="step" style="--c:var(--green)"><b>Profil</b><span>Choisissez le parcours, le domaine et renseignez vos informations.</span><div class="ar">اختر المسار والمجال وأدخل بياناتك.</div></div>
+      <div class="step" style="--c:var(--orange)"><b>Activités</b><span>Ajoutez enseignements, publications, encadrements… un par un.</span><div class="ar">أضف التدريس والمنشورات والتأطير… كلاً على حدة.</div></div>
+      <div class="step" style="--c:var(--purple)"><b>Bilan</b><span>Lisez la recevabilité et les points, puis générez le PDF.</span><div class="ar">اطّلع على القبول والنقاط ثم صدّر التقرير.</div></div>
+    </div>
+  </section>
+
+  <section style="--c:var(--teal)">
+    <h2><span class="tag"></span>Domaines · الفروق بين المجالين</h2>
+    <p class="sub">&nbsp;</p>
+    <div class="two">
+      <div class="panel">
+        <h3>ST vs SHS</h3>
+        <ul>
+          <li>Mêmes points par activité et mêmes plafonds.</li>
+          <li>Publication obligatoire : A+/A/B en ST ; A/B/C en SHS.</li>
+          <li>CUN 54 : minimum recherche <b>230</b> pts (ST) ou <b>120</b> pts (SHS) ; pédagogie <b>80</b> pts.</li>
+        </ul>
+      </div>
+      <div class="panel ar">
+        <h3>العلوم والتكنولوجيا مقابل العلوم الإنسانية والاجتماعية</h3>
+        <ul>
+          <li>نقاط وسقوف النشاطات متطابقة.</li>
+          <li>المنشور الإلزامي: A+/A/B في ST و A/B/C في SHS.</li>
+          <li>الدورة 54: بحث ≥ <b>230</b> (ST) أو <b>120</b> (SHS)، وبيداغوجيا ≥ <b>80</b>.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="src" style="--c:var(--red)">
+    <h2><span class="tag"></span>Sources · المراجع</h2>
+    <p class="sub">&nbsp;</p>
+    <div class="panel">
+      <ul>
+        <li><a href="https://www.mesrs.dz/wp-content/uploads/2022/02/Arrete-n-804-du-14-juil-2021-habilitation-universitaire-fr.pdf" rel="noopener">Arrêté n° 804 du 14 juillet 2021 — habilitation universitaire</a></li>
+        <li><a href="https://www.mesrs.dz/wp-content/uploads/2022/02/decres-21-50-28-01-2021-modalite-habilitation-fr.pdf" rel="noopener">Décret exécutif n° 21-50 du 28 janvier 2021</a></li>
+        <li><a href="https://www.mesrs.dz/wp-content/uploads/2026/05/Condition-et-Grille-devaluation-CUN-54.pdf" rel="noopener">Conditions et grille d'évaluation CUN 54 (mai 2026)</a></li>
+      </ul>
+      <p class="sub" style="margin-top:12px">L'arrêté 804 ne publie pas de seuil minimal de points pour l'habilitation : le programme n'en invente pas. · لا يحدد القرار 804 حدًا أدنى للنقاط في التأهيل، والبرنامج لا يخترع حدًا.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>© <b>Dr. Aissa Meflah</b> · <a href="mailto:meflah_aissa@yahoo.fr">meflah_aissa@yahoo.fr</a></p>
+    <p style="font-size:.85rem;opacity:.8">Outil d'aide non officiel · résultats indicatifs · أداة مساعدة غير رسمية · النتائج استرشادية</p>
+  </div>
+</footer>
+
+<script>
+// Liens GitHub déduits de l'adresse de la page : https://UTILISATEUR.github.io/DEPOT/
+(function(){
+  var host=location.hostname, parts=location.pathname.split('/').filter(Boolean);
+  var user=host.endsWith('.github.io')?host.split('.')[0]:null, repo=parts[0]||null;
+  if(user&&repo){
+    var base='https://github.com/'+user+'/'+repo;
+    document.getElementById('dl').href=base+'/releases/latest';
+    document.getElementById('repo').href=base;
+  }
+})();
+</script>
+</body>
+</html>
